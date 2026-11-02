@@ -12,7 +12,7 @@ from threading import Thread
 # === 1. WEB SERVER KEEPALIVE ===
 app = Flask(__name__)
 @app.route('/')
-def home(): return "Bot đang cày React full tính năng!"
+def home(): return "Bot đang cày React (Từ dưới lên, Nhái All Icon)!"
 def run_server(): app.run(host="0.0.0.0", port=8080)
 
 bot = commands.Bot(command_prefix="!", self_bot=True)
@@ -20,7 +20,7 @@ bot = commands.Bot(command_prefix="!", self_bot=True)
 # === 2. CẤU HÌNH TÀI KHOẢN ===
 CHANNEL_ID = 1381302690335952988
 GUILD_ID = 1194106864582004849
-FARM_EMOJI = "🔥"
+FARM_EMOJI = "🔥" # Icon dự phòng khi bài viết chưa có ai react
 
 CONCURRENT_CHANNELS = 2  
 CHUNK_SIZE = 100         
@@ -47,7 +47,7 @@ def load_json():
 def save_json(data):
     with open(PROGRESS_FILE, "w", encoding="utf-8") as f: json.dump(data, f, indent=2)
 
-# === 3. XỬ LÝ QUÉT BÀI CŨ AN TOÀN ===
+# === 3. XỬ LÝ QUÉT BÀI TỪ DƯỚI LÊN ===
 async def process_channel(channel, progress_data):
     key = str(channel.id)
     ch_progress = progress_data.get(key, {})
@@ -55,16 +55,18 @@ async def process_channel(channel, progress_data):
     reacted = ch_progress.get("total_reacted", 0)
 
     kwargs = {"limit": CHUNK_SIZE} 
-    if last_id: kwargs["after"] = discord.Object(id=int(last_id))
+    # Dùng 'before' để lùi về quá khứ từ mốc ID đang lưu
+    if last_id: kwargs["before"] = discord.Object(id=int(last_id))
 
     last_reacted_id = None
     
-    async for message in channel.history(oldest_first=True, **kwargs):
+    # Quét mặc định (từ mới nhất về cũ nhất)
+    async for message in channel.history(**kwargs):
         if message.author.bot: continue
         
         last_reacted_id = message.id
         
-        # Nhái lại toàn bộ icon đang có trên bài viết
+        # Nhái lại toàn bộ icon đang có
         if message.reactions:
             for reaction in message.reactions:
                 try:
@@ -73,10 +75,10 @@ async def process_channel(channel, progress_data):
                     reacted += 1
                 except discord.HTTPException as e:
                     if e.status == 429:
-                        penalty = float(getattr(e, "retry_after", 5.0))
-                        await asyncio.sleep(penalty + 1.0)
+                        penalty = float(getattr(e, "retry_after", 3.0))
+                        await asyncio.sleep(penalty + 0.5)
                 except: pass
-        # Nếu bài chưa có icon nào, thả icon mặc định
+        # Bài trống thì thả icon mặc định
         else:
             try:
                 await asyncio.sleep(random.uniform(1.2, 2.5))
@@ -84,8 +86,8 @@ async def process_channel(channel, progress_data):
                 reacted += 1
             except discord.HTTPException as e:
                 if e.status == 429:
-                    penalty = float(getattr(e, "retry_after", 5.0))
-                    await asyncio.sleep(penalty + 1.0)
+                    penalty = float(getattr(e, "retry_after", 3.0))
+                    await asyncio.sleep(penalty + 0.5)
             except: pass
 
     if last_reacted_id:
