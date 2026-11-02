@@ -18,7 +18,7 @@ def run_server(): app.run(host="0.0.0.0", port=8080)
 
 # === CẤU HÌNH TỪ FILE CŨ CỦA BẠN ===
 # Lưu ý: Token dưới đây là token cũ bạn cung cấp, hãy thay bằng Token mới sau khi đổi mật khẩu
-TOKEN = "TOKEN"
+TOKEN = os.environ.get("TOKEN")
 
 # --- Từ react.py ---
 DELAY = 1.0
