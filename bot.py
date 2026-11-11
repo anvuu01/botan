@@ -21,11 +21,11 @@ def run_server(): app.run(host="0.0.0.0", port=8080)
 TOKEN = os.environ.get("TOKEN")
 
 # --- Từ react.py ---
-DELAY = 1.6
+DELAY = 1.0
 MAX_MESSAGES_PER_CHANNEL = None
 SKIP_BOT_MESSAGES = True
 FULL_SCAN = True
-CONCURRENT_CHANNELS = 4
+CONCURRENT_CHANNELS = 1
 EMOJI_WHITELIST = []
 EMOJI_BLACKLIST = []
 
